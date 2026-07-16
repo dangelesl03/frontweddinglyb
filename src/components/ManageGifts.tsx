@@ -28,8 +28,11 @@ const ManageGifts: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [filterCategory, setFilterCategory] = useState('Todas las categorías');
   const [searchTerm, setSearchTerm] = useState('');
-
   const [categories, setCategories] = useState<string[]>(['Todas las categorías']);
+  
+  // Estado para los precios editados en línea (ID -> valor de texto)
+  const [editedPrices, setEditedPrices] = useState<{ [key: string]: string }>({});
+  const [savingPriceId, setSavingPriceId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -38,7 +41,6 @@ const ManageGifts: React.FC = () => {
         setCategories(['Todas las categorías', ...data.map((cat: any) => cat.name)]);
       } catch (error) {
         console.error('Error loading categories:', error);
-        // Fallback a categorías por defecto
         setCategories(['Todas las categorías', 'Luna de Miel', 'Arte y Deco', 'Otro']);
       }
     };
@@ -50,6 +52,8 @@ const ManageGifts: React.FC = () => {
       setLoading(true);
       const data = await apiService.getGifts();
       setGifts(data);
+      // Limpiar precios editados al recargar
+      setEditedPrices({});
     } catch (error: any) {
       showAlert('error', 'Error al cargar los regalos');
       console.error('Error loading gifts:', error);
@@ -72,7 +76,6 @@ const ManageGifts: React.FC = () => {
 
   const handleSaveSuccess = () => {
     setEditingGift(null);
-    // Forzar recarga de regalos después de actualizar
     setTimeout(() => {
       loadGifts();
     }, 100);
@@ -95,6 +98,55 @@ const ManageGifts: React.FC = () => {
     } catch (error: any) {
       showAlert('error', error?.message || 'Error al eliminar el regalo');
       console.error('Error deleting gift:', error);
+    }
+  };
+
+  // Manejar el cambio de precio localmente en texto
+  const handlePriceChange = (giftId: string, val: string) => {
+    setEditedPrices(prev => ({
+      ...prev,
+      [giftId]: val
+    }));
+  };
+
+  // Guardar el precio editado en línea
+  const handleSavePrice = async (gift: Gift) => {
+    const priceText = editedPrices[gift._id];
+    if (priceText === undefined) return;
+
+    const newPrice = parseFloat(priceText);
+    if (isNaN(newPrice) || newPrice < 0) {
+      showAlert('error', 'Por favor ingresa un precio válido mayor o igual a 0');
+      return;
+    }
+
+    try {
+      setSavingPriceId(gift._id);
+      
+      // Llamar al endpoint para actualizar el precio del regalo
+      await apiService.updateGift(gift._id, {
+        ...gift,
+        price: newPrice
+      });
+
+      showAlert('success', `Precio de "${gift.name}" actualizado a S/ ${newPrice.toFixed(2)}`);
+      
+      // Actualizar el estado local para reflejar el cambio de inmediato sin recarga completa
+      setGifts(prev =>
+        prev.map(g => (g._id === gift._id ? { ...g, price: newPrice } : g))
+      );
+
+      // Remover de la lista de modificados
+      setEditedPrices(prev => {
+        const copy = { ...prev };
+        delete copy[gift._id];
+        return copy;
+      });
+    } catch (error: any) {
+      showAlert('error', error?.message || 'Error al actualizar el precio');
+      console.error('Error updating price:', error);
+    } finally {
+      setSavingPriceId(null);
     }
   };
 
@@ -124,32 +176,38 @@ const ManageGifts: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Gestionar Regalos</h2>
-        
-        {/* Filtros */}
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <div className="mb-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar
-            </label>
+            <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'serif' }}>
+              Gestionar Regalos
+            </h2>
+            <p className="text-xs text-gray-500">
+              Vista compacta estilo Excel. Edita el precio y presiona <strong>Enter</strong> o haz clic en 💾 para guardar.
+            </p>
+          </div>
+          <div className="text-xs text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 self-start md:self-auto">
+            Total filtrados: <strong>{filteredGifts.length}</strong> / Total general: <strong>{gifts.length}</strong>
+          </div>
+        </div>
+        
+        {/* Filtros compactos */}
+        <div className="grid md:grid-cols-3 gap-3 mb-2">
+          <div className="md:col-span-2">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nombre o descripción..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aqua-500"
+              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-aqua-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Categoría
-            </label>
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aqua-500"
+              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-aqua-500 bg-white"
             >
               {categories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -157,91 +215,169 @@ const ManageGifts: React.FC = () => {
             </select>
           </div>
         </div>
-
-        <div className="text-sm text-gray-600">
-          Total de regalos: <strong>{filteredGifts.length}</strong>
-        </div>
       </div>
 
-      {/* Lista de regalos */}
-      <div className="space-y-4">
-        {filteredGifts.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p>No se encontraron regalos</p>
-          </div>
-        ) : (
-          filteredGifts.map((gift) => (
-            <div
-              key={gift._id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start space-x-4">
-                {/* Imagen */}
-                <div className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                  {gift.imageUrl ? (
-                    <img
-                      src={gift.imageUrl.includes('data:') ? gift.imageUrl : `${gift.imageUrl}?v=${gift._id}`}
-                      alt={gift.name}
-                      className="w-full h-full object-cover"
-                      key={`${gift._id}-${gift.imageUrl?.substring(0, 50)}`} // Forzar re-render cuando cambia la imagen
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
+      {/* Tabla estilo Excel Compacta */}
+      <div className="overflow-x-auto border border-gray-150 rounded-xl">
+        <table className="min-w-full divide-y divide-gray-200 text-left text-xs">
+          <thead className="bg-gray-50 text-gray-700 font-semibold uppercase tracking-wider text-[10px]">
+            <tr>
+              <th className="px-3 py-2 text-center w-10">#</th>
+              <th className="px-3 py-2 w-14">Imagen</th>
+              <th className="px-3 py-2 min-w-[200px]">Nombre del Regalo</th>
+              <th className="px-3 py-2">Categoría</th>
+              <th className="px-3 py-2 text-center w-36">Precio (S/)</th>
+              <th className="px-3 py-2 text-center">Disp. / Total</th>
+              <th className="px-3 py-2 text-center">Contribuido</th>
+              <th className="px-3 py-2 text-center">Estado</th>
+              <th className="px-3 py-2 text-center w-32">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {filteredGifts.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="text-center py-10 text-gray-500 italic">
+                  No se encontraron regalos
+                </td>
+              </tr>
+            ) : (
+              filteredGifts.map((gift, idx) => {
+                const currentPriceText = editedPrices[gift._id] !== undefined ? editedPrices[gift._id] : gift.price.toString();
+                const isModified = editedPrices[gift._id] !== undefined && parseFloat(editedPrices[gift._id]) !== gift.price;
+                const isSaving = savingPriceId === gift._id;
 
-                {/* Información */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        {gift.name}
-                        {!gift.isActive && (
-                          <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">Inactivo</span>
-                        )}
-                      </h3>
-                      {gift.description && (
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{gift.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                        <span><strong>Precio:</strong> {gift.currency} {gift.price.toFixed(2)}</span>
-                        <span><strong>Categoría:</strong> {gift.category}</span>
-                        <span><strong>Disponible:</strong> {gift.available} / {gift.total}</span>
-                        {gift.total_contributed !== undefined && (
-                          <span><strong>Contribuido:</strong> S/ {gift.total_contributed.toFixed(2)}</span>
+                return (
+                  <tr key={gift._id} className="hover:bg-gray-50/70 transition-colors">
+                    {/* Index */}
+                    <td className="px-3 py-2 text-center text-gray-400 font-mono">
+                      {idx + 1}
+                    </td>
+
+                    {/* Thumbnail */}
+                    <td className="px-3 py-2">
+                      <div className="w-8 h-8 rounded bg-gray-150 overflow-hidden border border-gray-200">
+                        {gift.imageUrl ? (
+                          <img
+                            src={gift.imageUrl.includes('data:') ? gift.imageUrl : `${gift.imageUrl}?v=${gift._id}`}
+                            alt={gift.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">
+                            🖼️
+                          </div>
                         )}
                       </div>
-                    </div>
+                    </td>
 
-                    {/* Acciones */}
-                    <div className="flex space-x-2 ml-4">
-                      <button
-                        onClick={() => handleEdit(gift)}
-                        className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm font-medium"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(gift._id)}
-                        className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+                    {/* Name & description tooltip */}
+                    <td className="px-3 py-2 font-medium text-gray-900">
+                      <div className="font-semibold">{gift.name}</div>
+                      {gift.description && (
+                        <div className="text-[10px] text-gray-400 line-clamp-1 max-w-sm" title={gift.description}>
+                          {gift.description}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Category */}
+                    <td className="px-3 py-2 text-gray-600">
+                      <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[10px] font-medium">
+                        {gift.category}
+                      </span>
+                    </td>
+
+                    {/* Price Input (Excel style) */}
+                    <td className="px-3 py-1.5 text-center">
+                      <div className="flex items-center justify-center space-x-1">
+                        <span className="text-gray-400 font-semibold text-[11px]">S/</span>
+                        <input
+                          type="text"
+                          value={currentPriceText}
+                          onChange={(e) => handlePriceChange(gift._id, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleSavePrice(gift);
+                            }
+                          }}
+                          disabled={isSaving}
+                          className={`w-20 px-1.5 py-0.5 text-right font-mono border rounded text-xs focus:outline-none transition-all ${
+                            isModified 
+                              ? 'border-amber-400 bg-amber-50/50 focus:ring-1 focus:ring-amber-500' 
+                              : 'border-gray-200 hover:border-gray-300 focus:ring-1 focus:ring-aqua-500'
+                          }`}
+                        />
+                        {isModified && (
+                          <button
+                            onClick={() => handleSavePrice(gift)}
+                            disabled={isSaving}
+                            className="p-1 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold shadow-sm transition-colors flex-shrink-0"
+                            title="Guardar precio"
+                          >
+                            {isSaving ? '⏳' : '💾'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Available / Total */}
+                    <td className="px-3 py-2 text-center font-medium">
+                      <span className={gift.available === 0 ? 'text-red-600 font-bold' : 'text-gray-700'}>
+                        {gift.available}
+                      </span>
+                      <span className="text-gray-400"> / {gift.total}</span>
+                    </td>
+
+                    {/* Contributed */}
+                    <td className="px-3 py-2 text-center text-gray-700 font-mono">
+                      {gift.total_contributed !== undefined && gift.total_contributed > 0 ? (
+                        <span className="text-green-700 font-semibold">
+                          S/ {gift.total_contributed.toFixed(2)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-3 py-2 text-center">
+                      {gift.isActive !== false ? (
+                        <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-semibold border border-emerald-100">
+                          Activo
+                        </span>
+                      ) : (
+                        <span className="bg-gray-150 text-gray-500 px-2 py-0.5 rounded text-[10px] font-semibold border border-gray-200">
+                          Inactivo
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-3 py-1.5 text-center">
+                      <div className="flex items-center justify-center space-x-1.5">
+                        <button
+                          onClick={() => handleEdit(gift)}
+                          className="px-2 py-1 bg-aqua-50 hover:bg-aqua-100 text-aqua-700 border border-aqua-200 rounded text-[10px] font-bold transition-colors"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(gift._id)}
+                          className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded text-[10px] font-bold transition-colors"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Confirm Delete Dialog */}
