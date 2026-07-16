@@ -23,7 +23,7 @@ const MapWithMarker: React.FC<MapWithMarkerProps> = ({
       <p className="text-gray-700 mb-2 text-xs">{address}</p>
 
       {/* Contenedor del mapa con marcador rojo pre-cargado */}
-      <div className="mb-2 rounded-lg overflow-hidden relative flex-1" style={{ minHeight: '300px' }}>
+      <div className="mb-2 rounded-lg overflow-hidden relative flex-1" style={{ height: '300px' }}>
         {/* Mapa con marcador rojo automático - URL de embed de Google Maps con marcador incluido */}
         <iframe
           width="100%"

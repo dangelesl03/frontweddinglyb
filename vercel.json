@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://backwedding.vercel.app/api/$1"
+      "destination": "https://backweddinglyb.vercel.app/api/$1"
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "https://backwedding.vercel.app/api",
+    "REACT_APP_API_URL": "https://backweddinglyb.vercel.app/api",
     "NODE_OPTIONS": "--no-deprecation"
   }
 }

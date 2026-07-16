@@ -7,16 +7,16 @@ module.exports = {
     extend: {
       colors: {
         'aqua': {
-          50: '#f5f7f2',
-          100: '#e8ede0',
-          200: '#d1dbc1',
-          300: '#bac3a2',
-          400: '#a3ab83',
-          500: '#6B7E2E', // Verde olivo principal rgb(107, 126, 46)
-          600: '#5a6a26',
-          700: '#49561f',
-          800: '#384217',
-          900: '#272e0f',
+          50: '#faf8f5',   // Crema suave
+          100: '#f0e9e1',  // Arena muy claro
+          200: '#e0d3c6',  // Arena intermedio
+          300: '#c8b39c',  // Marrón claro
+          400: '#ab8f70',  // Marrón medio claro
+          500: '#8E7051',  // Marrón medio principal (Boda L & B)
+          600: '#775c40',  // Marrón medio oscuro
+          700: '#604b34',  // Marrón oscuro
+          800: '#4a3a28',  // Marrón muy oscuro
+          900: '#33281b',  // Café oscuro
         },
       },
     },

@@ -8,14 +8,21 @@ import Navigation from './components/Navigation';
 import EventPage from './pages/EventPage';
 import NuestraHistoriaPage from './pages/NuestraHistoriaPage';
 import GiftsPage from './pages/GiftsPage';
+import DedicationsPage from './pages/DedicationsPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 import Cart from './components/Cart';
+import { config } from './config';
 
 const AppContent: React.FC = () => {
   // Siempre iniciar con 'evento' como página por defecto
   const [activeTab, setActiveTab] = useState('evento');
   const { loading } = useAuth();
+
+  // Actualizar título del navegador dinámicamente
+  useEffect(() => {
+    document.title = config.wedding.title;
+  }, []);
   
   // Actualizar localStorage cuando cambia la pestaña activa
   useEffect(() => {
@@ -53,13 +60,14 @@ const AppContent: React.FC = () => {
   return (
     <AlertProvider>
       <CartProvider>
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-transparent">
           <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
           <main className="py-8">
             {activeTab === 'evento' && <EventPage />}
             {activeTab === 'nuestra-historia' && <NuestraHistoriaPage />}
             {activeTab === 'regalos' && <GiftsPage />}
+            {activeTab === 'dedicatorias' && <DedicationsPage />}
             {activeTab === 'reportes' && <ReportsPage />}
             {activeTab === 'admin' && <AdminPage />}
           </main>

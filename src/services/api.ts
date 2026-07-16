@@ -241,6 +241,37 @@ class ApiService {
           method: 'DELETE',
         });
       }
+
+      // Dedication endpoints
+      async getDedications(limit?: number) {
+        const params = limit ? `?limit=${limit}` : '';
+        return this.request(`/dedications${params}`);
+      }
+
+      async createDedication(dedicationData: { message: string; senderName?: string }) {
+        return this.request('/dedications', {
+          method: 'POST',
+          body: JSON.stringify(dedicationData),
+        });
+      }
+
+      // Admin dedication endpoints
+      async getAllDedications() {
+        return this.request('/dedications/admin');
+      }
+
+      async updateDedication(id: string, dedicationData: { message?: string; senderName?: string; isApproved?: boolean }) {
+        return this.request(`/dedications/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(dedicationData),
+        });
+      }
+
+      async deleteDedication(id: string) {
+        return this.request(`/dedications/${id}`, {
+          method: 'DELETE',
+        });
+      }
     }
 
     export const apiService = new ApiService();

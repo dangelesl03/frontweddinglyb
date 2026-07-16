@@ -3,6 +3,7 @@ import { apiService } from '../services/api';
 import ImageCarousel from '../components/ImageCarousel';
 import MapWithMarker from '../components/MapWithMarker';
 import DressCodeSlider from '../components/DressCodeSlider';
+import { config } from '../config';
 
 interface EventData {
   title: string;
@@ -23,25 +24,8 @@ interface EventData {
 }
 
 // Datos de las ubicaciones con marcadores rojos
-const CEREMONY_LOCATION = {
-  name: 'Parroquia Nuestra Señora de Fátima',
-  address: 'Parroquia Virgen de Fátima, Avenida Armendáriz, Miraflores, Perú',
-  date: '28 de marzo de 2026',
-  time: '03:30 p.m.',
-  googleMapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Parroquia+Virgen+de+Fátima,+Avenida+Armendáriz,+Miraflores,+Perú',
-  wazeUrl: 'https://waze.com/ul?q=Parroquia+Virgen+de+Fátima,+Avenida+Armendáriz,+Miraflores,+Perú',
-  mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1159.6880699373921!2d-77.03048291691383!3d-12.131972618152284!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105b7e3df33c885%3A0x34d782ed435323da!2sParroquia%20Nuestra%20Se%C3%B1ora%20de%20F%C3%A1tima!5e0!3m2!1ses!2spe!4v1769563603242!5m2!1ses!2spe'
-};
-
-const RECEPTION_LOCATION = {
-  name: 'Casona Clark',
-  address: 'Casona Clark, Avenida General Edmundo Aguilar Pastor, Lima, Perú',
-  date: '28 de marzo de 2026',
-  time: '06:00 p.m.',
-  googleMapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Casona+Clark,+Avenida+General+Edmundo+Aguilar+Pastor,+Lima,+Perú',
-  wazeUrl: 'https://waze.com/ul?q=Casona+Clark,+Avenida+General+Edmundo+Aguilar+Pastor,+Lima,+Perú',
-  mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.348929794219!2d-77.0164356240361!3d-12.156630988088928!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105b78bcfebdfbd%3A0xe7e652e22de5e1ec!2sCasona%20Clark!5e0!3m2!1ses!2spe!4v1769563710091!5m2!1ses!2spe'
-};
+const CEREMONY_LOCATION = config.locations.ceremony;
+const RECEPTION_LOCATION = config.locations.reception;
 
 // Imágenes de ejemplo para Dress Code (combinadas: mujeres y hombres)
 // Usando las imágenes proporcionadas por el usuario
@@ -51,8 +35,8 @@ const DRESS_CODE_EXAMPLES = [
   '/images/dress-code/ejemplo-hombre-1.png' // Terno gris elegante
 ];
 
-// Fecha hardcoded de la boda: 28 de marzo de 2026
-const WEDDING_DATE = '2026-03-28';
+// Fecha de la boda obtenida de config
+const WEDDING_DATE = config.wedding.weddingDate;
 
 const EventPage: React.FC = () => {
   const [event, setEvent] = useState<EventData | null>(null);
@@ -64,10 +48,7 @@ const EventPage: React.FC = () => {
     detalles: true,
     adicional: true
   });
-  const [expandedQuestions, setExpandedQuestions] = useState<{ [key: string]: boolean }>({
-    ninos: true,
-    estacionamiento: true
-  });
+
 
   useEffect(() => {
     loadEvent();
@@ -123,12 +104,7 @@ const EventPage: React.FC = () => {
     }));
   };
 
-  const toggleQuestion = (question: string) => {
-    setExpandedQuestions(prev => ({
-      ...prev,
-      [question]: !prev[question]
-    }));
-  };
+
 
   const formatDate = () => {
     // Usar la fecha hardcoded: 28 de marzo de 2026
@@ -165,7 +141,7 @@ const EventPage: React.FC = () => {
     : [];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 bg-white">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Hero Section con Carrusel */}
       {carouselImages.length > 0 && (
         <div className="mb-12">
@@ -173,37 +149,31 @@ const EventPage: React.FC = () => {
         </div>
       )}
 
-      {/* Card combinado: Banner + Información del evento */}
-      <div className="mb-8 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <div 
-          className="relative rounded-t-lg overflow-hidden w-full"
+      {/* Hero Section con la foto de los novios (Sin contenedor blanco, flotando con esquinas redondeadas y sombra premium) */}
+      <div 
+        className="relative rounded-2xl overflow-hidden w-full mb-8 shadow-md border border-gray-150"
+        style={{
+          aspectRatio: '21 / 9',
+          minHeight: '200px',
+          maxHeight: '380px',
+        }}
+      >
+        <img 
+          src="/images/event4.jpg"
+          alt={event.coupleNames}
+          className="absolute inset-0 w-full h-full object-cover"
           style={{
-            aspectRatio: '18 / 9',
-            minHeight: '220px',
-            maxHeight: '400px',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            objectPosition: '50% 72%'
           }}
-        >
-          {/* Imagen de fondo con object-fit para mantener calidad - Posicionada a la izquierda */}
-          <img 
-            src="/images/event4.jpg"
-            alt="Natalia & Daniel"
-            className="absolute inset-0 w-full h-full"
-            style={{
-              objectFit: 'cover',
-              objectPosition: 'left center',
-              width: '100%',
-              height: '100%'
-            }}
-          />
-          
-        </div>
-        
-        {/* Texto "Natalia & Daniel" debajo de la foto */}
-        <div className="bg-white px-4 md:px-6 py-4 md:py-6 text-center border-b border-gray-200">
+        />
+        {/* Gradiente sutil encima de la foto */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent"></div>
+      </div>
+
+      {/* Tarjeta de Información de los Novios y Cuenta Regresiva */}
+      <div className="mb-8 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        {/* Nombres de los novios debajo de la foto */}
+        <div className="px-4 md:px-6 py-6 md:py-8 text-center border-b border-gray-100">
           <h1 
             className="text-3xl md:text-5xl"
             style={{ 
@@ -212,7 +182,7 @@ const EventPage: React.FC = () => {
               fontWeight: 100,
               fontSize: 'clamp(32px, 8vw, 57px)',
               lineHeight: 'clamp(40px, 10vw, 68px)',
-              color: '#6B7E2E',
+              color: '#8E7051',
               letterSpacing: '-0.01em',
               WebkitFontSmoothing: 'antialiased',
               MozOsxFontSmoothing: 'grayscale',
@@ -233,40 +203,42 @@ const EventPage: React.FC = () => {
           </h1>
         </div>
         
-        {/* Información del evento */}
-        <div className="bg-gray-50 px-6 py-4">
-          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6 text-gray-700 mb-3">
-            <div className="flex items-center text-sm">
-              <svg className="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Detalles compactos del evento */}
+        <div className="bg-gray-50/50 px-6 py-5">
+          <div className="flex flex-wrap justify-center items-center gap-5 md:gap-8 text-gray-700 mb-4">
+            <div className="flex items-center text-sm font-medium">
+              <svg className="w-4 h-4 mr-2 text-aqua-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-9 4h10m-9 4h10m-5-8v12" />
               </svg>
-              <span className="text-xs md:text-sm">{formatDate()}</span>
+              <span>{formatDate()}</span>
             </div>
-            <div className="flex items-center text-sm">
-              <svg className="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center text-sm font-medium">
+              <svg className="w-4 h-4 mr-2 text-aqua-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-xs md:text-sm">{event.location}</span>
+              <span>{event.location}</span>
             </div>
-            <div className="flex items-center text-sm">
-              <svg className="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center text-sm font-medium">
+              <svg className="w-4 h-4 mr-2 text-aqua-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
-              <span className="text-xs md:text-sm">{event.dressCode}</span>
+              <span>{event.dressCode}</span>
             </div>
           </div>
-          <div className="flex items-center justify-center pt-2 border-t border-gray-200">
-            <span className="text-xs text-gray-600 mr-2">Faltan</span>
+          
+          {/* Contador de días */}
+          <div className="flex items-center justify-center pt-3 border-t border-gray-150">
+            <span className="text-xs font-semibold text-gray-500 mr-3 uppercase tracking-wider">Faltan</span>
             <div className="flex gap-1.5">
-              <div className="bg-purple-100 border-2 border-purple-300 rounded-lg px-3 py-1.5">
-                <span className="text-xl font-bold text-purple-700">{Math.floor(daysLeft / 10)}</span>
+              <div className="bg-aqua-100 border border-aqua-200 rounded-lg px-3 py-1 shadow-sm">
+                <span className="text-xl font-extrabold text-aqua-800">{Math.floor(daysLeft / 10)}</span>
               </div>
-              <div className="bg-purple-100 border-2 border-purple-300 rounded-lg px-3 py-1.5">
-                <span className="text-xl font-bold text-purple-700">{daysLeft % 10}</span>
+              <div className="bg-aqua-100 border border-aqua-200 rounded-lg px-3 py-1 shadow-sm">
+                <span className="text-xl font-extrabold text-aqua-800">{daysLeft % 10}</span>
               </div>
             </div>
-            <span className="text-xs text-gray-600 ml-2">Días</span>
+            <span className="text-xs font-semibold text-gray-500 ml-3 uppercase tracking-wider">Días</span>
           </div>
         </div>
       </div>
@@ -292,260 +264,246 @@ const EventPage: React.FC = () => {
 
         {expandedSections.ubicaciones && (
           <div className="px-6 pb-6 pt-4">
-            {/* Mapas con información lado a lado */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Ceremonia Religiosa - Izquierda */}
-              <div className="bg-gradient-to-br from-aqua-50 to-white border border-gray-200 rounded-lg p-4 flex flex-col shadow-sm">
-                {/* Header con icono grande - Estilo similar al banner */}
-                <div className="mb-4 flex items-start space-x-3">
-                  <div className="bg-white rounded-full p-3 flex-shrink-0 shadow-md">
-                    <svg className="w-6 h-6 text-aqua-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1" style={{ fontFamily: 'serif' }}>Ceremonia Religiosa</h3>
-                    <p className="text-xs text-gray-600 mb-2">Parroquia Virgen de Fátima</p>
-                    <span className="inline-block bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-medium">Puntualidad requerida</span>
-                  </div>
+            <div className="bg-gradient-to-br from-aqua-50 to-white border border-gray-200 rounded-lg p-5 md:p-6 flex flex-col shadow-sm">
+              {/* Encabezado Principal */}
+              <div className="mb-6 flex items-start space-x-4">
+                <div className="bg-white rounded-full p-3 flex-shrink-0 shadow-md">
+                  <svg className="w-6 h-6 text-aqua-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                 </div>
-
-                {/* Fecha y hora compactas */}
-                <div className="mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex items-center space-x-4 text-sm">
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 text-aqua-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-9 4h10m-9 4h10m-5-8v12" />
-                      </svg>
-                      <span className="text-gray-700 font-medium">{CEREMONY_LOCATION.date}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 text-aqua-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-gray-700 font-medium">{CEREMONY_LOCATION.time}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Mapa */}
-                <div className="flex-1 min-h-0">
-                  <MapWithMarker
-                    address={CEREMONY_LOCATION.address}
-                    mapEmbedUrl={CEREMONY_LOCATION.mapEmbedUrl}
-                    locationName={CEREMONY_LOCATION.name}
-                    locationReference={`${CEREMONY_LOCATION.name} - Miraflores`}
-                    googleMapsUrl={CEREMONY_LOCATION.googleMapsUrl}
-                    wazeUrl={CEREMONY_LOCATION.wazeUrl}
-                  />
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'serif' }}>Ceremonia y Recepción</h3>
+                  <p className="text-sm text-gray-600 mb-2 font-medium">Villa Illariy, Pachacámac</p>
+                  <p className="text-xs text-gray-600 leading-relaxed max-w-2xl">
+                    Toda la celebración se llevará a cabo en la misma villa, iniciando con la ceremonia religiosa en la capilla y continuando con la recepción social en los jardines.
+                  </p>
                 </div>
               </div>
 
-              {/* Ceremonia Civil y Recepción - Derecha */}
-              <div className="bg-gradient-to-br from-purple-50 to-white border border-gray-200 rounded-lg p-4 flex flex-col shadow-sm">
-                {/* Header con iconos en la misma línea */}
-                <div className="mb-4 flex items-start space-x-3">
-                  {/* Icono combinado */}
-                  <div className="bg-white rounded-full p-3 flex-shrink-0 shadow-md">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1" style={{ fontFamily: 'serif' }}>Ceremonia Civil y Recepción</h3>
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <p className="text-xs text-gray-600">Casona Clark</p>
-                      <span className="text-gray-400">•</span>
-                      <p className="text-xs text-gray-600">Música y baile</p>
+              {/* Horarios e Información del Evento */}
+              <div className="mb-6 pb-6 border-b border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Cronograma del Evento</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Ceremonia Religiosa */}
+                  <div className="bg-white/60 backdrop-blur rounded-lg p-4 border border-gray-100 flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold text-aqua-700 text-sm">⛪ Ceremonia Religiosa</span>
+                      <span className="bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded font-medium uppercase tracking-wider">Puntualidad requerida</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="inline-flex items-center gap-1.5 bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-medium">
-                        <span>💃</span>
-                        <span>¡A bailar se ha dicho!</span>
-                        <span>🕺</span>
-                        <span className="ml-1">🍾🥂🍷</span>
-                      </span>
+                    <p className="text-xs text-gray-500 font-medium mb-2">Capilla de la Villa</p>
+                    <div className="flex items-center space-x-4 text-xs text-gray-700">
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 text-aqua-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-9 4h10m-9 4h10m-5-8v12" />
+                        </svg>
+                        <span>{CEREMONY_LOCATION.date}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 text-aqua-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{CEREMONY_LOCATION.time}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Fecha y hora compactas */}
-                <div className="mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex items-center space-x-4 text-sm">
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 text-purple-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-9 4h10m-9 4h10m-5-8v12" />
-                      </svg>
-                      <span className="text-gray-700 font-medium">{RECEPTION_LOCATION.date}</span>
+                  {/* Recepción */}
+                  <div className="bg-white/60 backdrop-blur rounded-lg p-4 border border-gray-100 flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold text-aqua-700 text-sm">🥂 Civil y Recepción</span>
+                      <span className="bg-aqua-100 text-aqua-700 text-[10px] px-2 py-0.5 rounded font-medium uppercase tracking-wider">Música y baile</span>
                     </div>
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 text-purple-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-gray-700 font-medium">{RECEPTION_LOCATION.time}</span>
+                    <p className="text-xs text-gray-500 font-medium mb-2">Jardín de la Villa</p>
+                    <div className="flex items-center space-x-4 text-xs text-gray-700">
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 text-aqua-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-9 4h10m-9 4h10m-5-8v12" />
+                        </svg>
+                        <span>{RECEPTION_LOCATION.date}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 text-aqua-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{RECEPTION_LOCATION.time}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                {/* Mapa */}
-                <div className="flex-1 min-h-0">
-                  <MapWithMarker
-                    address={RECEPTION_LOCATION.address}
-                    mapEmbedUrl={RECEPTION_LOCATION.mapEmbedUrl}
-                    locationName={RECEPTION_LOCATION.name}
-                    locationReference={`${RECEPTION_LOCATION.name} - Santiago de Surco`}
-                    googleMapsUrl={RECEPTION_LOCATION.googleMapsUrl}
-                    wazeUrl={RECEPTION_LOCATION.wazeUrl}
+              </div>
+
+              {/* Fotos Referenciales lado a lado */}
+              <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
+                  <img 
+                    src="/images/capilla.jpg" 
+                    alt="Capilla Referencial" 
+                    className="w-full h-48 object-cover"
                   />
+                  <div className="bg-gray-50 p-2 text-center text-xs font-semibold text-gray-700 border-t border-gray-100">
+                    ⛪ Capilla de la Villa (Ceremonia)
+                  </div>
                 </div>
+                <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
+                  <img 
+                    src="/images/recepcion.jpg" 
+                    alt="Local de Recepción Referencial" 
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="bg-gray-50 p-2 text-center text-xs font-semibold text-gray-700 border-t border-gray-100">
+                    🌳 Jardín de la Villa (Recepción)
+                  </div>
+                </div>
+              </div>
+
+              {/* Mapa */}
+              <div className="min-h-[300px] rounded-lg overflow-hidden border border-gray-200 shadow-inner bg-white">
+                <MapWithMarker
+                  address={CEREMONY_LOCATION.address}
+                  mapEmbedUrl={CEREMONY_LOCATION.mapEmbedUrl}
+                  locationName="Villa Illariy"
+                  locationReference="Villa Illariy - Pachacámac"
+                  googleMapsUrl={CEREMONY_LOCATION.googleMapsUrl}
+                  wazeUrl={CEREMONY_LOCATION.wazeUrl}
+                />
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Sección: Más detalles del evento */}
-      <div className="mb-8 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <button
-          onClick={() => toggleSection('detalles')}
-          className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-200"
-        >
-          <h2 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'serif' }}>
-            Más detalles del evento
-          </h2>
-          <svg
-            className={`w-5 h-5 text-gray-400 transition-transform ${expandedSections.detalles ? 'transform rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {expandedSections.detalles && (
-          <div className="px-4 pb-4 pt-3">
-            {/* Dress Code */}
-            <div className="mb-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-2">Dress Code</h3>
-              <div className="flex flex-col md:flex-row gap-3">
-                {/* Descripción a la izquierda */}
-                <div className="flex-1 bg-gray-50 rounded-lg p-3">
-                  <p className="text-gray-700 mb-2 text-sm">
-                    <strong>Tipo de vestimenta:</strong> {event.dressCode}
-                  </p>
-                  <div className="text-gray-700 mb-2 text-sm">
-                    <p className="mb-1"><strong>Información adicional:</strong></p>
-                    <div className="ml-3 space-y-1">
-                      <p className="text-xs"><strong>Mujeres:</strong> Vestido largo sin estampados, evitemos el color blanco, crema, nude, dorado y plateado.</p>
-                      <p className="text-xs"><strong>Hombres:</strong> Terno y zapatos, evitemos el color azul oscuro.</p>
-                    </div>
-                    <p className="mt-2 text-xs text-gray-600 italic">
-                      *Se limitará el ingreso a las personas que no cumplan con el dress code
-                    </p>
-                  </div>
-                </div>
-
-                {/* Slider de ejemplos a la derecha */}
-                <div className="w-full md:w-64 flex-shrink-0">
-                  <DressCodeSlider images={DRESS_CODE_EXAMPLES} />
-                </div>
-              </div>
-            </div>
-
-            {/* Información de contacto */}
+      {/* Sección: Detalles Importantes del Evento */}
+      <div className="space-y-6 mb-6">
+        {/* Fila 1: Confirmación de Asistencia e Indicaciones side-by-side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* Card 1: Confirmación de Asistencia */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
             <div>
-              <h3 className="text-base font-semibold text-gray-900 mb-2">Información de contacto</h3>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-gray-700 mb-1 text-sm">
-                  <strong>Vive tu boda - Wedding Planner</strong>
-                </p>
-                <div className="flex items-center text-gray-700 text-sm">
-                  <svg className="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-aqua-50 rounded-full p-2.5 text-aqua-600 flex-shrink-0 shadow-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  <span><strong>WhatsApp o número de teléfono:</strong> 919573907</span>
+                </div>
+                <h3 className="text-base font-bold text-gray-900 uppercase tracking-wider" style={{ fontFamily: 'serif' }}>
+                  Confirmación de Asistencia
+                </h3>
+              </div>
+              
+              <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                Confírmanos tu asistencia hasta el <strong className="text-aqua-800">22 de agosto</strong> al siguiente número:
+              </p>
+              
+              <div className="bg-gray-50 rounded-xl p-3 mb-4 text-center border border-gray-100">
+                <p className="text-sm font-bold text-gray-800">934-976-466</p>
+                <p className="text-[10px] text-gray-500 font-medium">(Yislenia - Wedding Planner)</p>
+              </div>
+              
+              <p className="text-[10px] text-red-600 italic font-medium leading-relaxed bg-red-50/50 p-2.5 rounded-lg border border-red-100/50">
+                * Queremos que disfruten plenamente de esta ocasión tan especial, por ello nuestra boda será una celebración exclusivamente para adultos.
+              </p>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <a 
+                href="https://w.app/lissetybraulio" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block w-full py-2.5 px-4 bg-aqua-600 text-white rounded-xl text-center text-xs font-bold hover:bg-aqua-700 transition-colors shadow-sm"
+              >
+                Confirmar por WhatsApp
+              </a>
+            </div>
+          </div>
+
+          {/* Card 2: Indicaciones */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-aqua-50 rounded-full p-2.5 text-aqua-600 flex-shrink-0 shadow-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold text-gray-900 uppercase tracking-wider" style={{ fontFamily: 'serif' }}>
+                  Indicaciones
+                </h3>
+              </div>
+              
+              <div className="space-y-3.5 text-xs text-gray-700 leading-relaxed">
+                <div className="flex items-start">
+                  <span className="mr-2 mt-0.5 flex-shrink-0">🚗</span>
+                  <p>Contaremos con estacionamiento privado para <strong>40 vehículos</strong>.</p>
+                </div>
+                <div className="flex items-start">
+                  <span className="mr-2 mt-0.5 flex-shrink-0">🚌</span>
+                  <p>
+                    Ofreceremos un servicio de <strong>bus de retorno a Lima</strong> a partir de la media noche con paradas en <strong>Javier Prado, Acho y Plaza Norte</strong>.
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-[10px] text-gray-600 font-medium">
+                  * Se requiere precisar el servicio del cual harán uso al momento de confirmar asistencia.
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sección: Información adicional */}
-      <div className="mb-8 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <button
-          onClick={() => toggleSection('adicional')}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-200"
-        >
-          <h2 className="text-2xl font-semibold text-gray-900" style={{ fontFamily: 'serif' }}>
-            Información adicional
-          </h2>
-          <svg
-            className={`w-6 h-6 text-gray-400 transition-transform ${expandedSections.adicional ? 'transform rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {expandedSections.adicional && (
-          <div className="px-6 pb-6 pt-4">
-            <div className="space-y-0">
-              <div className="border-b border-gray-200 pb-4">
-                <button 
-                  onClick={() => toggleQuestion('ninos')}
-                  className="w-full flex items-center justify-between text-left"
-                >
-                  <span className="text-gray-900 font-medium">¿Pueden asistir niños al evento?</span>
-                  <svg 
-                    className={`w-5 h-5 text-gray-400 transition-transform ${expandedQuestions.ninos ? 'transform rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {expandedQuestions.ninos && (
-                  <p className="text-gray-700 mt-3 ml-0">
-                    Para esta ocasión especial, hemos decidido que el evento sea únicamente para adultos.
-                  </p>
-                )}
-              </div>
-              <div className="border-b border-gray-200 pb-4">
-                <button 
-                  onClick={() => toggleQuestion('estacionamiento')}
-                  className="w-full flex items-center justify-between text-left"
-                >
-                  <span className="text-gray-900 font-medium">¿Habrá estacionamiento disponible?</span>
-                  <svg 
-                    className={`w-5 h-5 text-gray-400 transition-transform ${expandedQuestions.estacionamiento ? 'transform rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {expandedQuestions.estacionamiento && (
-                  <p className="text-gray-700 mt-3 ml-0">
-                    El lugar donde se llevará a cabo la recepción no cuenta con estacionamiento disponible.
-                  </p>
-                )}
-              </div>
+            
+            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+              <span className="text-[10px] text-gray-400 font-medium">Villa Illariy, Pachacámac</span>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Fila 2: Código de Vestimenta full-width */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            {/* Detalles text (Left Column) */}
+            <div className="flex-1 w-full">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-aqua-50 rounded-full p-2.5 text-aqua-600 flex-shrink-0 shadow-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 16v2a1 1 0 001 1h4a1 1 0 001-1v-2M9 8h6M9 12h6M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold text-gray-900 uppercase tracking-wider" style={{ fontFamily: 'serif' }}>
+                  Código de Vestimenta
+                </h3>
+              </div>
+              
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="bg-aqua-50/50 rounded-xl py-2 px-6 text-center border border-aqua-100">
+                  <span className="text-sm font-bold text-aqua-800 uppercase tracking-wider">Elegante</span>
+                </div>
+                <div className="text-xs text-gray-700 flex space-x-6">
+                  <span className="flex items-center">
+                    <span className="mr-1.5 flex-shrink-0">👔</span>
+                    <span><strong>Ellos:</strong> Traje formal</span>
+                  </span>
+                  <span className="flex items-center">
+                    <span className="mr-1.5 flex-shrink-0">👗</span>
+                    <span><strong>Ellas:</strong> Vestido largo</span>
+                  </span>
+                </div>
+              </div>
+              
+              <p className="text-xs text-amber-700 bg-amber-50 rounded-xl p-3 border border-amber-100/50 font-medium leading-relaxed">
+                ⚠️ <strong className="text-amber-800">Importante:</strong> Se solicita <strong>EVITAR</strong> prendas en color blanco, crema, beige o similares.
+              </p>
+            </div>
+            
+            {/* Slider de imágenes (Right Column) */}
+            <div className="w-full md:w-80 flex-shrink-0">
+              <DressCodeSlider images={DRESS_CODE_EXAMPLES} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Sección: Mensaje especial */}
       {event.additionalInfo && (
-        <div className="mb-8 bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm">
-          <div className="px-6 py-8 text-center">
-            <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line" style={{ fontFamily: 'serif' }}>
+        <div className="mb-6 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="px-6 py-6 text-center">
+            <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line" style={{ fontFamily: 'serif' }}>
               {event.additionalInfo}
             </p>
           </div>
@@ -553,15 +511,15 @@ const EventPage: React.FC = () => {
       )}
 
       {/* Sección: Galería de 3 imágenes */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Imagen 1 */}
-          <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
             <div 
               className="relative w-full"
               style={{
                 aspectRatio: '3 / 4',
-                minHeight: '350px'
+                minHeight: '320px'
               }}
             >
               <img 
@@ -576,12 +534,12 @@ const EventPage: React.FC = () => {
           </div>
 
           {/* Imagen 2 */}
-          <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
             <div 
               className="relative w-full"
               style={{
                 aspectRatio: '3 / 4',
-                minHeight: '350px'
+                minHeight: '320px'
               }}
             >
               <img 
@@ -593,12 +551,12 @@ const EventPage: React.FC = () => {
           </div>
 
           {/* Imagen 3 */}
-          <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
             <div 
               className="relative w-full"
               style={{
                 aspectRatio: '3 / 4',
-                minHeight: '350px'
+                minHeight: '320px'
               }}
             >
               <img 
@@ -611,35 +569,7 @@ const EventPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Sección final: Imagen de cierre */}
-      <div className="mb-8 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <div 
-          className="relative rounded-lg overflow-hidden w-full"
-          style={{
-            aspectRatio: '18 / 9',
-            minHeight: '220px',
-            maxHeight: '400px',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {/* Imagen de fondo con object-fit para mantener calidad - Posicionada a la izquierda */}
-          <img 
-            src="/images/evento/bottom2.jpg"
-            alt="Cierre"
-            className="absolute inset-0 w-full h-full"
-            style={{
-              objectFit: 'cover',
-              objectPosition: 'left center',
-              width: '100%',
-              height: '100%'
-            }}
-          />
         </div>
-      </div>
-    </div>
   );
 };
 

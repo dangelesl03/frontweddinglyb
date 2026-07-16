@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { config } from '../config';
 
 interface LoginProps {
   isAdminLogin?: boolean;
@@ -51,10 +52,10 @@ const Login: React.FC<LoginProps> = ({ isAdminLogin = false }) => {
           {!isAdminLogin && (
             <>
               <p className="text-gray-600">
-                Natalia & Daniel
+                {config.wedding.coupleNames}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                28 de Marzo de 2026
+                {config.locations.ceremony.date}
               </p>
             </>
           )}

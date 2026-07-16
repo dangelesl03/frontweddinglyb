@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useAlert } from '../contexts/AlertContext';
 import { apiService } from '../services/api';
+import { config } from '../config';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -36,26 +37,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
 
   const paymentInfo = {
     yape: {
-      number: '986506367',
+      number: config.payment.yape.number,
       qr: getQRImage('yape')
     },
     plin: {
-      number: '986506367',
+      number: config.payment.plin.number,
       qr: getQRImage('plin')
     },
-    bankAccounts: [
-      {
-        bank: 'BCP',
-        account: '19379110084074',
-        cci: '00219317911008407416'
-      },
-      {
-        bank: 'Interbank',
-        account: '1223097161919',
-        cci: '00312201309716191997'
-      }
-    ],
-    accountHolder: 'Daniel Angeles Lujan'
+    bankAccounts: config.payment.bankAccounts,
+    accountHolder: config.payment.accountHolder
   };
 
   // Función para comprimir imagen
@@ -192,7 +182,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
     }
     
     if (!note || note.trim() === '') {
-      newErrors.note = 'Por favor ingresa una nota con tu nombre';
+      newErrors.note = 'Por favor ingresa tu nombre de invitado';
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -449,7 +439,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
 
             <div>
               <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
-                Nota <span className="text-red-500">*</span>
+                Nombre de invitado <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="note"

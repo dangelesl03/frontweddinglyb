@@ -1,4 +1,5 @@
 import React from 'react';
+import { config } from '../config';
 
 interface Milestone {
   date: string;
@@ -8,26 +9,7 @@ interface Milestone {
 }
 
 const NuestraHistoriaPage: React.FC = () => {
-  const milestones: Milestone[] = [
-    {
-      date: '2016',
-      title: 'El comienzo',
-      description: 'Una noche mientras cenábamos viendo el mar en Cala decidimos comenzar nuestra relación, por allá en julio del 2016.',
-      image: '/images/evento/izqhist2.jpg'
-    },
-    {
-      date: '2023',
-      title: 'El compromiso',
-      description: 'Luego, en setiembre del 2023 mientras caminábamos por la orilla del rio Sena y a los pies de la torre Eiffel, Daniel se arrodilló, sacó un anillo y preguntó ¿Quieres ser mi compañera en este viaje llamado vida?',
-      image: '/images/evento/midhist2.jpg'
-    },
-    {
-      date: '2024',
-      title: 'Nuestro hogar',
-      description: 'El año siguiente decidimos asumir un siguiente reto: comprar un departamento, el cual a base de mucho amor y esfuerzo lo hemos convertido en nuestro hogar',
-      image: '/images/evento/derhist2.jpg'
-    }
-  ];
+  const milestones: Milestone[] = config.story.milestones;
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 bg-white">
       {/* Sección: Un sí para toda la vida */}
@@ -37,14 +19,10 @@ const NuestraHistoriaPage: React.FC = () => {
             className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4 text-center"
             style={{ fontFamily: '"Playfair Display", "Cormorant Garamond", "Georgia", serif' }}
           >
-            Un sí para toda la vida
+            {config.story.proposalTitle}
           </h2>
           <p className="text-gray-700 text-center leading-relaxed max-w-3xl mx-auto">
-            Nos comprometimos el 9 de septiembre de 2023, durante nuestro Eurotrip. Era nuestra última noche en París. 
-            Caminábamos junto al río Sena, contemplando las luces destellantes de la Torre Eiffel, cuando Daniel —sabiendo 
-            cuánto amo las fotos—, había preparado en secreto una sesión para inmortalizar la ciudad del amor. En una de esas 
-            tomas, Daniel se arrodilló, sacó un anillo y me preguntó: "¿Quieres ser mi compañera en este viaje llamado vida?" 
-            Y así, comenzó nuestro para siempre.
+            {config.story.proposalText}
           </p>
         </div>
       </div>
@@ -57,27 +35,27 @@ const NuestraHistoriaPage: React.FC = () => {
           border: '1px solid rgba(0, 0, 0, 0.05)'
         }}
       >
-        {/* Texto decorativo "PARIS" - Izquierda */}
+        {/* Texto decorativo - Izquierda */}
         <div className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 -rotate-90 origin-center opacity-25">
-          <span className="text-xl font-serif text-[#8B7355] tracking-widest font-light">PARIS</span>
+          <span className="text-xl font-serif text-[#8B7355] tracking-widest font-light">{config.story.decorativeLabel}</span>
         </div>
 
-        {/* Texto decorativo "PARIS" - Derecha */}
+        {/* Texto decorativo - Derecha */}
         <div className="hidden md:block absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 origin-center opacity-25">
-          <span className="text-xl font-serif text-[#8B7355] tracking-widest font-light">PARIS</span>
+          <span className="text-xl font-serif text-[#8B7355] tracking-widest font-light">{config.story.decorativeLabel}</span>
         </div>
 
-        {/* Texto decorativo "FRANCE" - Izquierda arriba */}
+        {/* Texto decorativo Alt - Izquierda arriba */}
         <div className="hidden md:block absolute left-6 top-1/4 transform -rotate-90 origin-left opacity-20">
-          <span className="text-base font-serif text-[#8B7355] tracking-wide">FRANCE</span>
+          <span className="text-base font-serif text-[#8B7355] tracking-wide">{config.story.decorativeLabelAlt}</span>
         </div>
 
-        {/* Texto decorativo "FRANCE" - Derecha arriba */}
+        {/* Texto decorativo Alt - Derecha arriba */}
         <div className="hidden md:block absolute right-6 top-1/4 transform rotate-90 origin-right opacity-20">
-          <span className="text-base font-serif text-[#8B7355] tracking-wide">FRANCE</span>
+          <span className="text-base font-serif text-[#8B7355] tracking-wide">{config.story.decorativeLabelAlt}</span>
         </div>
 
-        {/* Bandera de Francia - Izquierda */}
+        {/* Bandera decorativa opcional - Izquierda */}
         <div className="hidden md:block absolute left-8 top-1/3 transform -translate-y-1/2 opacity-20">
           <div className="flex flex-col" style={{ width: '20px', height: '40px' }}>
             <div className="flex-1" style={{ backgroundColor: '#002654' }}></div>
@@ -86,7 +64,7 @@ const NuestraHistoriaPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Bandera de Francia - Derecha */}
+        {/* Bandera decorativa opcional - Derecha */}
         <div className="hidden md:block absolute right-8 top-1/3 transform -translate-y-1/2 opacity-20">
           <div className="flex flex-col" style={{ width: '20px', height: '40px' }}>
             <div className="flex-1" style={{ backgroundColor: '#002654' }}></div>
@@ -119,7 +97,7 @@ const NuestraHistoriaPage: React.FC = () => {
 
         <div className="relative w-full rounded-lg overflow-hidden shadow-xl z-10">
           <img 
-            src="/images/history.webp"
+            src={config.story.proposalMainImage}
             alt="Nuestra historia"
             className="w-full rounded-lg object-cover md:object-contain md:max-h-[600px]"
             style={{ 
@@ -154,7 +132,7 @@ const NuestraHistoriaPage: React.FC = () => {
           {/* Timeline vertical para mobile - visible solo hasta 768px */}
           <div className="relative py-4 md:hidden">
             {/* Línea conectora vertical */}
-            <div className="absolute left-8 top-12 bottom-12 w-0.5" style={{ backgroundColor: '#9CAF88' }}></div>
+            <div className="absolute left-8 top-12 bottom-12 w-0.5" style={{ backgroundColor: '#c8b39c' }}></div>
 
             {/* Milestones en formato vertical */}
             <div className="space-y-8 relative">
@@ -162,14 +140,14 @@ const NuestraHistoriaPage: React.FC = () => {
                 <div key={`mobile-${index}`} className="relative flex items-start">
                   {/* Círculo verde olivo con número */}
                   <div className="relative z-10 mr-6 flex-shrink-0">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg border-2" style={{ borderColor: '#6B7E2E' }}>
-                      <span className="font-bold text-xl" style={{ color: '#6B7E2E' }}>{index + 1}</span>
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg border-2" style={{ borderColor: '#8E7051' }}>
+                      <span className="font-bold text-xl" style={{ color: '#8E7051' }}>{index + 1}</span>
                     </div>
                   </div>
 
                   {/* Contenido del milestone */}
                   <div className="flex-1 pt-2">
-                    <div className="font-semibold text-lg mb-1" style={{ color: '#6B7E2E' }}>
+                    <div className="font-semibold text-lg mb-1" style={{ color: '#8E7051' }}>
                       {milestone.date}
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2" style={{ fontFamily: 'serif' }}>
@@ -187,7 +165,7 @@ const NuestraHistoriaPage: React.FC = () => {
           {/* Timeline horizontal para desktop - visible solo desde 768px */}
           <div className="relative py-8 hidden md:block">
             {/* Línea conectora horizontal */}
-            <div className="absolute top-16 left-1/4 right-1/4 h-1" style={{ backgroundColor: '#9CAF88' }}></div>
+            <div className="absolute top-16 left-1/4 right-1/4 h-1" style={{ backgroundColor: '#c8b39c' }}></div>
 
             {/* Milestones en formato horizontal */}
             <div className="grid grid-cols-3 gap-4 relative items-stretch">
@@ -195,14 +173,14 @@ const NuestraHistoriaPage: React.FC = () => {
                 <div key={`desktop-${index}`} className="relative flex flex-col items-center">
                   {/* Círculo verde olivo con número */}
                   <div className="relative z-10 mb-4">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg border-2" style={{ borderColor: '#6B7E2E' }}>
-                      <span className="font-bold text-xl" style={{ color: '#6B7E2E' }}>{index + 1}</span>
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg border-2" style={{ borderColor: '#8E7051' }}>
+                      <span className="font-bold text-xl" style={{ color: '#8E7051' }}>{index + 1}</span>
                     </div>
                   </div>
 
                   {/* Contenido del milestone */}
                   <div className="text-center max-w-xs flex flex-col h-full">
-                    <div className="font-semibold text-lg mb-2" style={{ color: '#6B7E2E' }}>
+                    <div className="font-semibold text-lg mb-2" style={{ color: '#8E7051' }}>
                       {milestone.date}
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2" style={{ fontFamily: 'serif' }}>
@@ -226,11 +204,11 @@ const NuestraHistoriaPage: React.FC = () => {
             className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4 text-center"
             style={{ fontFamily: '"Playfair Display", "Cormorant Garamond", "Georgia", serif' }}
           >
-            Momentos especiales
+            {config.story.gallerySubtitle}
           </h2>
           
           <p className="text-gray-700 text-center text-lg mb-6 leading-relaxed max-w-3xl mx-auto" style={{ fontFamily: 'serif' }}>
-            Después de recorrer juntos 21 países y más de 65 ciudades, hoy emprendemos el viaje más importante de todos: aquel que se camina sin mapas, pero con el corazón
+            {config.story.galleryDescription}
           </p>
           
           {/* Galería móvil - vertical */}
