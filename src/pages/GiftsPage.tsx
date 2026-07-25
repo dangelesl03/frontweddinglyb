@@ -23,6 +23,15 @@ interface Gift {
   }>;
 }
 
+const isSpecialPartialGift = (name: string) => {
+  const n = name.toLowerCase();
+  return n.includes('frigobar') || 
+         n.includes('parrilla levadiza') || 
+         n.includes('juego de living') || 
+         n.includes('carpa tienda') || 
+         n.includes('panel de tv');
+};
+
 const GiftsPage: React.FC = () => {
   const { addToCart, items: cartItems } = useCart();
   const { showAlert } = useAlert();
@@ -124,21 +133,26 @@ const GiftsPage: React.FC = () => {
         return;
       }
 
-      // Validar mínimo de 500 soles para contribuciones parciales
-      if (amount < 500) {
-        showAlert('warning', 'El monto mínimo para contribuir parcialmente es S/ 500.00');
+      const price = getPrice(gift);
+      const availableAmount = getAvailableAmount(gift);
+
+      // Validar mínimo para contribuciones parciales (o mitad del precio para regalos especiales)
+      const isSpecial = isSpecialPartialGift(gift.name);
+      const minContrib = isSpecial ? price / 2 : 500;
+      const finalMin = Math.min(minContrib, availableAmount);
+
+      if (amount < finalMin) {
+        showAlert('warning', `El monto mínimo para contribuir es S/ ${finalMin.toFixed(2)}`);
         return;
       }
 
       // Validar que el monto no exceda el disponible
-      const availableAmount = getAvailableAmount(gift);
       if (amount > availableAmount) {
         showAlert('warning', `El monto máximo disponible es S/ ${availableAmount.toFixed(2)}`);
         return;
       }
 
       // Validar que el monto no exceda el precio del producto
-      const price = getPrice(gift);
       if (amount > price) {
         showAlert('warning', `El monto no puede exceder el precio del producto (S/ ${price.toFixed(2)})`);
         return;
@@ -364,54 +378,68 @@ const GiftsPage: React.FC = () => {
               </div>
 
               {/* Estado */}
-              <div className="mb-4">
+              <div className="mb-4 flex flex-wrap gap-2 items-center">
                 {isGiftFullyContributed(gift) ? (
                   <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-semibold">
                     VENDIDO
                   </span>
                 ) : (
-                  <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                    Disponible
-                  </span>
+                  <>
+                    <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+                      Disponible
+                    </span>
+                    {gift.total > 1 && (
+                      <span className="inline-block bg-aqua-100 text-aqua-800 text-xs px-2 py-1 rounded-full font-semibold">
+                        Quedan {gift.total - Math.floor(getTotalContributed(gift) / getPrice(gift))} de {gift.total} disponibles
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
 
               {/* Acciones */}
               {contributingTo === gift._id ? (
-                <div className="space-y-3">
-                  <div>
-                    <input
-                      type="number"
-                      value={contributionAmount}
-                      onChange={(e) => setContributionAmount(e.target.value)}
-                      placeholder={`Monto a contribuir (mín. S/ 500, máx. S/ ${getAvailableAmount(gift).toFixed(2)})`}
-                      max={getAvailableAmount(gift)}
-                      min="500"
-                      step="100"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aqua-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Mínimo: S/ 500.00 | Disponible: S/ {getAvailableAmount(gift).toFixed(2)} de S/ {getPrice(gift).toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleContribute(gift._id)}
-                      className="flex-1 bg-aqua-600 text-white py-2 px-4 rounded-md hover:bg-aqua-700 text-sm font-medium"
-                    >
-                      Contribuir
-                    </button>
-                    <button
-                      onClick={() => {
-                        setContributingTo(null);
-                        setContributionAmount('');
-                      }}
-                      className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 text-sm font-medium"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
+                (() => {
+                  const isSpecial = isSpecialPartialGift(gift.name);
+                  const minContrib = isSpecial ? getPrice(gift) / 2 : 500;
+                  const finalMin = Math.min(minContrib, getAvailableAmount(gift));
+                  return (
+                    <div className="space-y-3">
+                      <div>
+                        <input
+                          type="number"
+                          value={contributionAmount}
+                          onChange={(e) => setContributionAmount(e.target.value)}
+                          placeholder={`Monto a contribuir (mín. S/ ${finalMin}, máx. S/ ${getAvailableAmount(gift).toFixed(2)})`}
+                          max={getAvailableAmount(gift)}
+                          min={finalMin}
+                          step="100"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aqua-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Mínimo: S/ {finalMin.toFixed(2)} | Disponible: S/ {getAvailableAmount(gift).toFixed(2)} de S/ {getPrice(gift).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleContribute(gift._id)}
+                          className="flex-1 bg-aqua-600 text-white py-2 px-4 rounded-md hover:bg-aqua-700 text-sm font-medium"
+                        >
+                          Contribuir
+                        </button>
+                        <button
+                          onClick={() => {
+                            setContributingTo(null);
+                            setContributionAmount('');
+                          }}
+                          className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 text-sm font-medium"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="space-y-2">
                   <button
@@ -453,7 +481,7 @@ const GiftsPage: React.FC = () => {
                     </svg>
                     Agregar al Carrito
                   </button>
-                  {!isGiftFullyContributed(gift) && getPrice(gift) > 1000 && !gift.name.toLowerCase().includes('batidora') && (
+                  {!isGiftFullyContributed(gift) && (getPrice(gift) > 1000 || isSpecialPartialGift(gift.name)) && !gift.name.toLowerCase().includes('batidora') && (
                     <button
                       onClick={() => setContributingTo(gift._id)}
                       className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 text-sm font-medium"
