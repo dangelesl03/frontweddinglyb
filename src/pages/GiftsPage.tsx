@@ -360,6 +360,18 @@ const GiftsPage: React.FC = () => {
                 </p>
               )}
 
+              {/* Precio unitario y total */}
+              <div className="mb-4 flex items-baseline justify-between">
+                <span className="text-xl font-bold text-gray-900">
+                  S/ {getPrice(gift).toFixed(2)}
+                </span>
+                {gift.total > 1 && (
+                  <span className="text-xs text-gray-500 font-medium">
+                    S/ {(getPrice(gift) * gift.total).toFixed(2)} total
+                  </span>
+                )}
+              </div>
+
               {/* Barra de progreso */}
               <div className="mb-4">
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
