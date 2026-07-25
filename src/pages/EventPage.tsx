@@ -164,7 +164,7 @@ const EventPage: React.FC = () => {
           alt={event.coupleNames}
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            objectPosition: 'center'
+            objectPosition: '50% 95%'
           }}
         />
         {/* Gradiente sutil encima de la foto */}
