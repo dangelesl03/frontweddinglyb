@@ -88,7 +88,7 @@ const GiftsPage: React.FC = () => {
         const price = typeof gift.price === 'string' ? parseFloat(gift.price) : gift.price;
         // El backend ahora incluye total_contributed en la respuesta
         const totalContributed = parseFloat(gift.total_contributed || 0);
-        const isFullyContributed = totalContributed >= price;
+        const isFullyContributed = totalContributed >= (price * (gift.total || 1));
         
         return {
           ...gift,
@@ -210,14 +210,15 @@ const GiftsPage: React.FC = () => {
   const getProgressPercentage = (gift: Gift) => {
     const totalContributed = getTotalContributed(gift);
     const price = typeof gift.price === 'string' ? parseFloat(gift.price) : gift.price;
-    if (price === 0) return 0;
-    return Math.min((totalContributed / price) * 100, 100);
+    const totalValue = price * (gift.total || 1);
+    if (totalValue === 0) return 0;
+    return Math.min((totalContributed / totalValue) * 100, 100);
   };
 
   const isGiftFullyContributed = (gift: Gift) => {
     const totalContributed = getTotalContributed(gift);
     const price = typeof gift.price === 'string' ? parseFloat(gift.price) : gift.price;
-    return totalContributed >= price;
+    return totalContributed >= (price * (gift.total || 1));
   };
 
   const getPrice = (gift: Gift) => {
@@ -227,7 +228,7 @@ const GiftsPage: React.FC = () => {
   const getAvailableAmount = (gift: Gift) => {
     const price = getPrice(gift);
     const totalContributed = getTotalContributed(gift);
-    return Math.max(0, price - totalContributed);
+    return Math.max(0, (price * (gift.total || 1)) - totalContributed);
   };
 
   if (loading) {
