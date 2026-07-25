@@ -374,7 +374,7 @@ const GiftsPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>S/ {getTotalContributed(gift).toFixed(2)}</span>
-                  <span>S/ {getPrice(gift).toFixed(2)}</span>
+                  <span>S/ {(getPrice(gift) * (gift.total || 1)).toFixed(2)}</span>
                 </div>
               </div>
 
