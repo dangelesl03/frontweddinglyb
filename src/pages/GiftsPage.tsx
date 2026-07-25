@@ -462,14 +462,14 @@ const GiftsPage: React.FC = () => {
                       const added = addToCart({
                         _id: gift._id,
                         name: gift.name,
-                        price: availableAmount, // Usar el monto disponible en lugar del precio completo
+                        price: getPrice(gift), // Usar el precio unitario del regalo
                         quantity: 1,
                         imageUrl: gift.imageUrl,
                         total: gift.total
                       }, availableAmount);
 
                       if (added) {
-                        showAlert('success', `Agregado al carrito por S/ ${availableAmount.toFixed(2)} (monto disponible)`);
+                        showAlert('success', `Agregado al carrito por S/ ${getPrice(gift).toFixed(2)}`);
                       } else {
                         showAlert('warning', 'No se puede agregar: excedería el monto disponible');
                       }
