@@ -92,7 +92,12 @@ const Cart: React.FC = () => {
                           <span className="w-8 text-center">{item.quantity || 1}</span>
                           <button
                             onClick={() => updateQuantity(item._id, (item.quantity || 1) + 1)}
-                            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
+                            disabled={(item.quantity || 1) >= (item.total || 1)}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                              (item.quantity || 1) >= (item.total || 1)
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold'
+                            }`}
                           >
                             +
                           </button>

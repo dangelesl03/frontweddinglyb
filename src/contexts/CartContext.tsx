@@ -6,6 +6,7 @@ interface CartItem {
   price: number;
   quantity?: number;
   imageUrl?: string;
+  total?: number;
 }
 
 interface CartContextType {
@@ -94,9 +95,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       return;
     }
     setItems(prevItems =>
-      prevItems.map(item =>
-        item._id === id ? { ...item, quantity } : item
-      )
+      prevItems.map(item => {
+        if (item._id === id) {
+          const maxQty = item.total || 1;
+          const newQty = Math.min(quantity, maxQty);
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
     );
   };
 

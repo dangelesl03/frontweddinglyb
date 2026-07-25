@@ -158,7 +158,8 @@ const GiftsPage: React.FC = () => {
         name: gift.name,
         price: amount, // Usar el monto de contribución como precio
         quantity: 1,
-        imageUrl: gift.imageUrl
+        imageUrl: gift.imageUrl,
+        total: gift.total
       }, availableAmount);
 
       if (added) {
@@ -434,7 +435,8 @@ const GiftsPage: React.FC = () => {
                         name: gift.name,
                         price: availableAmount, // Usar el monto disponible en lugar del precio completo
                         quantity: 1,
-                        imageUrl: gift.imageUrl
+                        imageUrl: gift.imageUrl,
+                        total: gift.total
                       }, availableAmount);
 
                       if (added) {
