@@ -12,6 +12,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'evento', label: 'Evento' },
     { id: 'regalos', label: 'Regalos' },
+    { id: 'nuestra-historia', label: 'Nuestra Historia' },
     ...(user?.role === 'admin' ? [
       { id: 'reportes', label: 'Reportes' },
       { id: 'admin', label: 'Administración' }
