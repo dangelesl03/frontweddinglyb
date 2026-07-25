@@ -110,12 +110,13 @@ const EventPage: React.FC = () => {
     // Usar la fecha hardcoded: 28 de marzo de 2026
     const [year, month, day] = WEDDING_DATE.split('-').map(Number);
     const date = new Date(year, month - 1, day); // month es 0-indexed en Date
-    return date.toLocaleDateString('es-ES', {
+    const formatted = date.toLocaleDateString('es-ES', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
   };
 
   if (loading) {
@@ -311,7 +312,7 @@ const EventPage: React.FC = () => {
                   {/* Recepción */}
                   <div className="bg-white/60 backdrop-blur rounded-lg p-4 border border-gray-100 flex flex-col">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold text-aqua-700 text-sm">🥂 Civil y Recepción</span>
+                      <span className="font-semibold text-aqua-700 text-sm">🥂 Recepción</span>
                       <span className="bg-aqua-100 text-aqua-700 text-[10px] px-2 py-0.5 rounded font-medium uppercase tracking-wider">Música y baile</span>
                     </div>
                     <p className="text-xs text-gray-500 font-medium mb-2">Jardín de la Villa</p>
@@ -392,7 +393,7 @@ const EventPage: React.FC = () => {
               </div>
               
               <p className="text-xs text-gray-600 mb-3 leading-relaxed">
-                Confírmanos tu asistencia hasta el <strong className="text-aqua-800">22 de agosto</strong> al siguiente número:
+                Confírmanos tu asistencia hasta el <strong className="text-aqua-800">31 de agosto</strong> al siguiente número:
               </p>
               
               <div className="bg-gray-50 rounded-xl p-3 mb-4 text-center border border-gray-100">
@@ -407,7 +408,7 @@ const EventPage: React.FC = () => {
             
             <div className="mt-4 pt-4 border-t border-gray-100">
               <a 
-                href="https://w.app/lissetybraulio" 
+                href={config.contact.whatsappUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="block w-full py-2.5 px-4 bg-aqua-600 text-white rounded-xl text-center text-xs font-bold hover:bg-aqua-700 transition-colors shadow-sm"

@@ -21,7 +21,7 @@ export const config = {
   contact: {
     plannerName: 'Yislenia - Wedding Planner',
     phoneNumber: '934976466',                  // Teléfono de contacto / WhatsApp
-    whatsappUrl: 'https://w.app/lissetybraulio', // Link de WhatsApp personalizado
+    whatsappUrl: 'https://wa.me/51934976466?text=Hola,%20quisiera%20confirmar%20mi%20asistencia%20a%20la%20boda%20de%20Lisset%20y%20Braulio', // Link de WhatsApp personalizado
   },
 
   // Ubicación de la Ceremonia y Recepción (Ambos en Villa Illariy)
@@ -39,7 +39,7 @@ export const config = {
       name: 'Local de Recepción (Jardín de la Villa)',
       address: 'Villa Illariy, Pachacámac, Lima, Perú',
       date: '19 de setiembre de 2026',
-      time: '06:00 p.m.',
+      time: '05:00 p.m.',
       googleMapsUrl: 'https://maps.app.goo.gl/NhMvWfEoMqisto11A',
       wazeUrl: 'https://waze.com/ul?q=Villa+Illariy,+Pachacamac',
       mapEmbedUrl: 'https://maps.google.com/maps?q=Villa Illariy, Pachacamac&t=&z=15&ie=UTF8&iwloc=&output=embed'
