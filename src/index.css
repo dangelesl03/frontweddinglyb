@@ -3,7 +3,10 @@
 @tailwind utilities;
 
 body {
-  background-color: #dfd3c3;
+  background-color: #f7f5f0;
+  background-image: url('./background_texture.png');
+  background-repeat: repeat;
+  background-attachment: fixed;
 }
 
 @keyframes slide-in-right {
