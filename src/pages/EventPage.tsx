@@ -160,11 +160,11 @@ const EventPage: React.FC = () => {
         }}
       >
         <img 
-          src="/images/event4.jpg"
+          src="/images/preboda3.jpg"
           alt={event.coupleNames}
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            objectPosition: '50% 72%'
+            objectPosition: 'center'
           }}
         />
         {/* Gradiente sutil encima de la foto */}
