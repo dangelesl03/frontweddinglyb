@@ -452,7 +452,7 @@ const AddGiftForm: React.FC<AddGiftFormProps> = ({ onSuccess }) => {
           {imageSource === 'url' ? (
             <div>
               <input
-                type="url"
+                type="text"
                 id="imageUrl"
                 name="imageUrl"
                 value={formData.imageUrl}

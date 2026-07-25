@@ -543,7 +543,7 @@ const EditGiftForm: React.FC<EditGiftFormProps> = ({ gift, onSuccess, onCancel }
           {imageSource === 'url' ? (
             <div>
               <input
-                type="url"
+                type="text"
                 id="edit-imageUrl"
                 name="imageUrl"
                 value={formData.imageUrl}
