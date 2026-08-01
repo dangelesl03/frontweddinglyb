@@ -18,9 +18,22 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
   const [receiptBase64, setReceiptBase64] = useState<string | undefined>(undefined);
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<{ receipt?: string; note?: string }>({});
+  
+  // Estados para diseño premium
+  const [activeMethod, setActiveMethod] = useState<'yape' | 'plin' | 'bank'>('yape');
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Información de pago
-  // Función helper para obtener la URL del QR (intenta varias rutas)
+  // Función helper para copiar número sin espacios
+  const handleCopy = (text: string, key: string) => {
+    const cleanedText = text.replace(/\s+/g, '');
+    navigator.clipboard.writeText(cleanedText);
+    setCopiedKey(key);
+    setTimeout(() => {
+      setCopiedKey(null);
+    }, 2000);
+  };
+
+  // Función helper para obtener la URL del QR
   const getQRImage = (type: 'yape' | 'plin'): string => {
     if (type === 'yape') {
       return '/qr-codes/yape-qr-v2.jpg';
@@ -31,11 +44,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
   const paymentInfo = {
     yape: {
       number: config.payment.yape.number,
-      qr: getQRImage('yape')
+      qr: getQRImage('yape'),
+      holder: 'Braulio Espinoza'
     },
     plin: {
       number: config.payment.plin.number,
-      qr: getQRImage('plin')
+      qr: getQRImage('plin'),
+      holder: 'Lisset Piscoya'
     },
     bankAccounts: config.payment.bankAccounts,
     accountHolder: config.payment.accountHolder
@@ -240,237 +255,333 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
+      <div className="bg-[#faf8f5] rounded-2xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-aqua-100 flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Información de Pago</h2>
+        <div className="sticky top-0 bg-[#faf8f5]/95 backdrop-blur-md border-b border-aqua-100 p-5 flex justify-between items-center z-10">
+          <div>
+            <h2 className="text-2xl font-serif text-aqua-800 font-semibold">Información de Pago</h2>
+            <p className="text-xs text-aqua-600 mt-0.5">Elige tu método de pago preferido para registrar tu regalo</p>
+          </div>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="p-1.5 rounded-full text-aqua-600 hover:bg-aqua-100 hover:text-aqua-800 transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 space-y-6 overflow-y-auto">
           {/* Resumen */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold mb-2">Resumen de tu compra:</h3>
-            <div className="space-y-1">
+          <div className="bg-white border border-aqua-100 rounded-xl p-4 shadow-sm">
+            <div className="flex justify-between items-center mb-2 pb-2 border-b border-dashed border-aqua-100">
+              <h3 className="font-serif text-aqua-800 font-medium">Resumen de tu contribución:</h3>
+              <span className="text-xs text-aqua-500 bg-aqua-50 px-2 py-0.5 rounded-full border border-aqua-100">
+                {items.length} {items.length === 1 ? 'regalo' : 'regalos'}
+              </span>
+            </div>
+            <div className="max-h-24 overflow-y-auto space-y-1.5 pr-1">
               {items.map((item) => (
-                <div key={item._id} className="flex justify-between text-sm">
-                  <span>{item.name} x{item.quantity}</span>
-                  <span>S/ {((typeof item.price === 'string' ? parseFloat(item.price) : item.price) * (item.quantity || 1)).toFixed(2)}</span>
+                <div key={item._id} className="flex justify-between text-sm text-aqua-700">
+                  <span className="font-light truncate max-w-[70%]">{item.name} <span className="text-aqua-400 font-normal">x{item.quantity}</span></span>
+                  <span className="font-mono text-aqua-900 font-medium">S/ {((typeof item.price === 'string' ? parseFloat(item.price) : item.price) * (item.quantity || 1)).toFixed(2)}</span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between font-bold text-lg mt-3 pt-3 border-t">
-              <span>Total:</span>
-              <span>S/ {(typeof totalPrice === 'string' ? parseFloat(totalPrice) : totalPrice).toFixed(2)}</span>
+            <div className="flex justify-between font-serif font-bold text-lg mt-3 pt-3 border-t border-aqua-100 text-aqua-900">
+              <span>Total a Transferir:</span>
+              <span className="font-mono">S/ {(typeof totalPrice === 'string' ? parseFloat(totalPrice) : totalPrice).toFixed(2)}</span>
             </div>
           </div>
 
-          {/* Métodos de pago */}
-          <div className="space-y-6">
-            {/* Yape */}
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg mb-3 flex items-center">
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2">YAPE</span>
-                Número: {paymentInfo.yape.number}
-              </h3>
-              <div className="flex items-center space-x-4">
-                <div className="bg-white p-2 rounded border flex-shrink-0">
-                  <img
-                    src={paymentInfo.yape.qr}
-                    alt="QR Yape"
-                    className="w-40 h-40 object-contain"
-                    onError={(e) => {
-                      // Si la imagen no se encuentra, usar QR genérico
-                      const target = e.target as HTMLImageElement;
-                      target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${paymentInfo.yape.number}&margin=10`;
-                    }}
-                  />
+          {/* Selector de métodos de pago (Pestañas) */}
+          <div>
+            <label className="block text-sm font-medium text-aqua-800 mb-2.5 font-serif">
+              Elige cómo deseas realizar tu aporte:
+            </label>
+            <div className="grid grid-cols-3 gap-2 p-1 bg-aqua-100/50 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setActiveMethod('yape')}
+                className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex flex-col items-center justify-center gap-1 ${
+                  activeMethod === 'yape'
+                    ? 'bg-white text-purple-700 shadow-sm border border-purple-100'
+                    : 'text-aqua-700 hover:bg-white/40 hover:text-aqua-900'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#7a1fa2]"></span>
+                  <span className="font-semibold">Yape</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Escanea el código QR con la app de Yape o transfiere al número:
-                  </p>
-                  <p className="text-lg font-mono font-bold">{paymentInfo.yape.number}</p>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(paymentInfo.yape.number);
-                      alert('Número de Yape copiado al portapapeles');
-                    }}
-                    className="mt-2 text-sm text-aqua-600 hover:text-aqua-700"
-                  >
-                    📋 Copiar número
-                  </button>
-                </div>
-              </div>
-            </div>
+              </button>
 
-            {/* Plin */}
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg mb-3 flex items-center">
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-2">PLIN</span>
-                Número: {paymentInfo.plin.number}
-              </h3>
-              <div className="flex items-center space-x-4">
-                <div className="bg-white p-2 rounded border flex-shrink-0">
-                  <img
-                    src={paymentInfo.plin.qr}
-                    alt="QR Plin"
-                    className="w-40 h-40 object-contain"
-                    onError={(e) => {
-                      // Si la imagen no se encuentra, usar QR genérico
-                      const target = e.target as HTMLImageElement;
-                      target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${paymentInfo.plin.number}&margin=10`;
-                    }}
-                  />
+              <button
+                type="button"
+                onClick={() => setActiveMethod('plin')}
+                className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex flex-col items-center justify-center gap-1 ${
+                  activeMethod === 'plin'
+                    ? 'bg-white text-[#00bcd4] shadow-sm border border-cyan-100'
+                    : 'text-aqua-700 hover:bg-white/40 hover:text-aqua-900'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#00bcd4]"></span>
+                  <span className="font-semibold">Plin</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Escanea el código QR con la app de Plin o transfiere al número:
-                  </p>
-                  <p className="text-lg font-mono font-bold">{paymentInfo.plin.number}</p>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(paymentInfo.plin.number);
-                      alert('Número de Plin copiado al portapapeles');
-                    }}
-                    className="mt-2 text-sm text-aqua-600 hover:text-aqua-700"
-                  >
-                    📋 Copiar número
-                  </button>
-                </div>
-              </div>
-            </div>
+              </button>
 
-            {/* Cuentas Bancarias */}
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg mb-3">Transferencia Bancaria</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                <span className="font-semibold">Titular:</span> {paymentInfo.accountHolder}
-              </p>
-              
-              <div className="space-y-6">
-                {paymentInfo.bankAccounts.map((bankAccount, index) => (
-                  <div key={index} className={`${index > 0 ? 'pt-4 border-t border-gray-200' : ''}`}>
-                    <div className="mb-3">
-                      <span className="text-sm text-gray-600">Banco:</span>
-                      <p className="font-semibold text-lg">{bankAccount.bank}</p>
-                    </div>
-                    <div className="mb-3">
-                      <span className="text-sm text-gray-600">
-                        {bankAccount.bank === 'BCP' ? 'Cuenta Soles:' : 'Cuenta Ahorro Sueldo Soles:'}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <p className="font-mono font-semibold">{bankAccount.account}</p>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(bankAccount.account);
-                            alert(`Número de cuenta ${bankAccount.bank} copiado al portapapeles`);
-                          }}
-                          className="text-sm text-aqua-600 hover:text-aqua-700"
-                        >
-                          📋 Copiar
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-600">
-                        {bankAccount.bank === 'BCP' ? 'CCI (Interbancario):' : 'CCI (Cuenta Interbancario):'}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <p className="font-mono font-semibold">{bankAccount.cci}</p>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(bankAccount.cci);
-                            alert(`CCI ${bankAccount.bank} copiado al portapapeles`);
-                          }}
-                          className="text-sm text-aqua-600 hover:text-aqua-700"
-                        >
-                          📋 Copiar
-                        </button>
-                      </div>
+              <button
+                type="button"
+                onClick={() => setActiveMethod('bank')}
+                className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex flex-col items-center justify-center gap-1 ${
+                  activeMethod === 'bank'
+                    ? 'bg-white text-aqua-800 shadow-sm border border-aqua-200'
+                    : 'text-aqua-700 hover:bg-white/40 hover:text-aqua-900'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-aqua-500"></span>
+                  <span className="font-semibold">Transferencia</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Paneles de Contenido de Pago */}
+          <div className="bg-white border border-aqua-100 rounded-xl p-5 shadow-sm transition-all duration-500 min-h-[220px] flex items-center justify-center">
+            {activeMethod === 'yape' && (
+              <div className="w-full flex flex-col md:flex-row gap-5 items-center animate-fade-in">
+                {/* QR */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-2 group">
+                  <div className="bg-aqua-50/50 p-2.5 rounded-xl border border-aqua-100/80 shadow-inner overflow-hidden max-w-[150px] md:max-w-[170px]">
+                    <img
+                      src={paymentInfo.yape.qr}
+                      alt="QR Yape"
+                      className="w-full h-auto object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${paymentInfo.yape.number}&margin=10`;
+                      }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-aqua-400 font-light italic">Pasa el cursor para ampliar</span>
+                </div>
+                {/* Detalles */}
+                <div className="flex-1 space-y-3 text-center md:text-left w-full">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5 border-b border-aqua-50 pb-2">
+                    <span className="text-xs font-semibold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full self-center md:self-start">YAPE</span>
+                    <div className="text-xs text-aqua-500">
+                      Titular: <span className="font-semibold text-aqua-700">{paymentInfo.yape.holder}</span>
                     </div>
                   </div>
-                ))}
+                  <div>
+                    <p className="text-xs text-aqua-500 font-light">Escanea el QR o yapea al número:</p>
+                    <p className="text-2xl font-mono font-bold text-aqua-900 tracking-wider mt-1">{paymentInfo.yape.number}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(paymentInfo.yape.number, 'yape')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300 ${
+                      copiedKey === 'yape'
+                        ? 'bg-green-50 border-green-200 text-green-700'
+                        : 'bg-white border-aqua-200 text-aqua-700 hover:bg-aqua-50 hover:text-aqua-800'
+                    }`}
+                  >
+                    {copiedKey === 'yape' ? '✓ ¡Número Copiado!' : '📋 Copiar número'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
+
+            {activeMethod === 'plin' && (
+              <div className="w-full flex flex-col md:flex-row gap-5 items-center animate-fade-in">
+                {/* QR */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-2 group">
+                  <div className="bg-aqua-50/50 p-2.5 rounded-xl border border-aqua-100/80 shadow-inner overflow-hidden max-w-[150px] md:max-w-[170px]">
+                    <img
+                      src={paymentInfo.plin.qr}
+                      alt="QR Plin"
+                      className="w-full h-auto object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${paymentInfo.plin.number}&margin=10`;
+                      }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-aqua-400 font-light italic">Pasa el cursor para ampliar</span>
+                </div>
+                {/* Detalles */}
+                <div className="flex-1 space-y-3 text-center md:text-left w-full">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5 border-b border-aqua-50 pb-2">
+                    <span className="text-xs font-semibold bg-cyan-100 text-cyan-800 px-2.5 py-0.5 rounded-full self-center md:self-start">PLIN</span>
+                    <div className="text-xs text-aqua-500">
+                      Titular: <span className="font-semibold text-aqua-700">{paymentInfo.plin.holder}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-aqua-500 font-light">Escanea el QR o transfiere al número:</p>
+                    <p className="text-2xl font-mono font-bold text-aqua-900 tracking-wider mt-1">{paymentInfo.plin.number}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(paymentInfo.plin.number, 'plin')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300 ${
+                      copiedKey === 'plin'
+                        ? 'bg-green-50 border-green-200 text-green-700'
+                        : 'bg-white border-aqua-200 text-aqua-700 hover:bg-aqua-50 hover:text-aqua-800'
+                    }`}
+                  >
+                    {copiedKey === 'plin' ? '✓ ¡Número Copiado!' : '📋 Copiar número'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeMethod === 'bank' && (
+              <div className="w-full space-y-4 animate-fade-in">
+                <div className="flex items-center justify-between border-b border-aqua-50 pb-2">
+                  <span className="text-xs font-semibold bg-aqua-100 text-aqua-800 px-2.5 py-0.5 rounded-full">TRANSFERENCIA</span>
+                  <div className="text-xs text-aqua-500">
+                    Titular: <span className="font-semibold text-aqua-700">{paymentInfo.accountHolder}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-1">
+                  {paymentInfo.bankAccounts.map((bankAccount, index) => (
+                    <div key={index} className="bg-aqua-50/30 p-3 rounded-lg border border-aqua-100/60 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-aqua-400 font-light">Banco</span>
+                        <span className="font-serif font-bold text-aqua-800 text-base">{bankAccount.bank}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center gap-2">
+                        <div className="text-left">
+                          <span className="text-[10px] text-aqua-400 block font-light">Número de Cuenta</span>
+                          <span className="font-mono text-sm font-semibold text-aqua-900">{bankAccount.account}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(bankAccount.account, `acc-${index}`)}
+                          className={`px-2.5 py-1 rounded text-xs transition-all duration-300 ${
+                            copiedKey === `acc-${index}`
+                              ? 'bg-green-50 text-green-700 border border-green-200'
+                              : 'bg-white text-aqua-600 border border-aqua-200 hover:bg-aqua-50'
+                          }`}
+                        >
+                          {copiedKey === `acc-${index}` ? '✓ Copiado' : '📋 Copiar'}
+                        </button>
+                      </div>
+
+                      <div className="flex justify-between items-center gap-2 pt-1 border-t border-dashed border-aqua-100/80">
+                        <div className="text-left">
+                          <span className="text-[10px] text-aqua-400 block font-light">Cuenta Interbancaria (CCI)</span>
+                          <span className="font-mono text-xs font-semibold text-aqua-900">{bankAccount.cci}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(bankAccount.cci, `cci-${index}`)}
+                          className={`px-2.5 py-1 rounded text-xs transition-all duration-300 ${
+                            copiedKey === `cci-${index}`
+                              ? 'bg-green-50 text-green-700 border border-green-200'
+                              : 'bg-white text-aqua-600 border border-aqua-200 hover:bg-aqua-50'
+                          }`}
+                        >
+                          {copiedKey === `cci-${index}` ? '✓ Copiado' : '📋 Copiar'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Campos obligatorios: Comprobante y Nota */}
-          <div className="mt-6 pt-6 border-t space-y-4">
+          {/* Formulario de confirmación */}
+          <div className="space-y-4 pt-4 border-t border-aqua-100">
+            <h4 className="font-serif text-aqua-800 font-medium text-sm">Confirma tu aporte subiendo tu comprobante:</h4>
+            
+            {/* Input de Invitado */}
             <div>
-              <label htmlFor="receipt" className="block text-sm font-medium text-gray-700 mb-2">
-                Comprobante de Pago <span className="text-red-500">*</span>
+              <label htmlFor="note" className="block text-xs font-medium text-aqua-700 mb-1">
+                Tu Nombre Completo <span className="text-red-500">*</span>
               </label>
               <input
-                id="receipt"
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aqua-500 focus:border-aqua-500"
-              />
-              {errors.receipt && (
-                <p className="mt-1 text-sm text-red-600">{errors.receipt}</p>
-              )}
-              {receiptFile && (
-                <p className="mt-1 text-sm text-green-600">
-                  ✓ Archivo seleccionado: {receiptFile.name}
-                </p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Formatos aceptados: JPG, PNG, GIF, PDF (máximo 5MB)
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de invitado <span className="text-red-500">*</span>
-              </label>
-              <textarea
                 id="note"
+                type="text"
                 value={note}
                 onChange={(e) => {
                   setNote(e.target.value);
-                  if (errors.note) {
-                    setErrors({ ...errors, note: undefined });
-                  }
+                  if (errors.note) setErrors({ ...errors, note: undefined });
                 }}
-                placeholder="Por favor ingresa tu nombre completo para identificar tu pago"
-                rows={3}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-aqua-500 focus:border-aqua-500 ${
-                  errors.note ? 'border-red-300' : 'border-gray-300'
+                placeholder="Ingresa tu nombre para saber quién envía el regalo"
+                className={`w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:border-transparent text-sm transition-all bg-white ${
+                  errors.note ? 'border-red-300 bg-red-50/20' : 'border-aqua-200 text-aqua-900'
                 }`}
               />
-              {errors.note && (
-                <p className="mt-1 text-sm text-red-600">{errors.note}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                💡 Sugerencia: Incluye tu nombre completo para facilitar la identificación de tu pago
-              </p>
+              {errors.note && <p className="mt-1 text-xs text-red-500">{errors.note}</p>}
+            </div>
+
+            {/* Input de Comprobante */}
+            <div>
+              <label htmlFor="receipt" className="block text-xs font-medium text-aqua-700 mb-1">
+                Comprobante de Pago <span className="text-red-500">*</span>
+              </label>
+              
+              <div className={`border-2 border-dashed rounded-xl p-4 text-center transition-all bg-white cursor-pointer relative ${
+                errors.receipt 
+                  ? 'border-red-300 hover:bg-red-50/10' 
+                  : receiptFile 
+                    ? 'border-green-300 bg-green-50/10' 
+                    : 'border-aqua-200 hover:border-aqua-400 hover:bg-aqua-50/20'
+              }`}>
+                <input
+                  id="receipt"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                
+                <div className="space-y-1.5 pointer-events-none">
+                  {receiptFile ? (
+                    <>
+                      <svg className="w-8 h-8 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-xs text-green-700 font-medium">✓ {receiptFile.name}</p>
+                      <p className="text-[10px] text-aqua-400 font-light">Haz clic o arrastra para cambiar de archivo</p>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-8 h-8 mx-auto text-aqua-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      <p className="text-xs text-aqua-600 font-medium">Seleccionar o soltar comprobante</p>
+                      <p className="text-[10px] text-aqua-400 font-light">Formatos JPG, PNG o PDF (máx. 5MB)</p>
+                    </>
+                  )}
+                </div>
+              </div>
+              {errors.receipt && <p className="mt-1.5 text-xs text-red-500">{errors.receipt}</p>}
             </div>
           </div>
+        </div>
 
-          {/* Botón de confirmar */}
-          <div className="mt-6 pt-6 border-t">
-            <button
-              onClick={handleConfirm}
-              disabled={isProcessing}
-              className="w-full bg-aqua-600 text-white py-3 px-6 rounded-md hover:bg-aqua-700 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-semibold"
-            >
-              {isProcessing ? 'Procesando...' : '✓ Confirmar Pago'}
-            </button>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              Al confirmar, marcarás estos regalos como pagados
-            </p>
-          </div>
+        {/* Footer Actions */}
+        <div className="p-5 border-t border-aqua-100 bg-aqua-50/30 flex flex-col gap-2 mt-auto">
+          <button
+            onClick={handleConfirm}
+            disabled={isProcessing}
+            className="w-full bg-aqua-500 hover:bg-aqua-600 text-white py-2.5 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm font-serif font-semibold tracking-wide transition-all shadow-md shadow-aqua-500/10 hover:shadow-lg active:scale-[0.99]"
+          >
+            {isProcessing ? 'Procesando aporte...' : 'Confirmar Aporte'}
+          </button>
+          <p className="text-[10px] text-aqua-400 text-center font-light mt-0.5">
+            Al confirmar, tus regalos seleccionados se marcarán como reservados hasta que validemos el comprobante. ¡Muchas gracias!
+          </p>
         </div>
       </div>
     </div>
