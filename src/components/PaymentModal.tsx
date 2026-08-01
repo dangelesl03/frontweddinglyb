@@ -23,7 +23,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm 
   // Función helper para obtener la URL del QR (intenta varias rutas)
   const getQRImage = (type: 'yape' | 'plin'): string => {
     if (type === 'yape') {
-      return '/qr-codes/yape-qr.jpg';
+      return '/qr-codes/yape-qr-v2.jpg';
     }
     return '/qr-codes/plin-qr.png';
   };
