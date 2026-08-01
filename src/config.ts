@@ -94,10 +94,10 @@ export const config = {
   payment: {
     accountHolder: 'Braulio Espinoza',          // Titular de la cuenta
     yape: {
-      number: 'Ver QR Plin',                   // Nombre/Número para Yape
+      number: '997 040 755',                   // Nombre/Número para Yape
     },
     plin: {
-      number: 'Lisset Piscoya (Ver QR)',       // Nombre/Número para Plin
+      number: '987 224 191',                   // Nombre/Número para Plin
     },
     bankAccounts: [
       {
